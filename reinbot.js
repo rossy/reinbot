@@ -4,7 +4,7 @@ var fs = require("fs");
 var https = require("https");
 var util = require("util");
 
-var authed = ["rossy", "FLYingG0D", "desumoyo", "desumoyo_osx"];
+var authed = ["rossy", "FLYingG0D", "desumoyo", "desumoyo_osx", "desumoyo_laptop", "shadowh511"];
 var name = "reinbot";
 var ponytime = 1325948400;
 var lastcheck = 0;
@@ -45,7 +45,7 @@ function scanPage(page, season, callback)
 							episode = parseInt(match[1]) - 1;
 							break;
 						}
-						else if (text.match(/720p.*Raw/i)) type = "itunes720p";
+						else if (text.match(/720p.*Raw/i) || text.match(/720p.*TEMP/)) type = "itunes720p";
 						else if (text.match(/720p.*CC/i)) type = "cc720p";
 						else if (text.match(/1080p/i)) type = "hdtv1080p";
 						else if (text.match(/SD/i)) type = "sd";
@@ -152,7 +152,7 @@ function countdown(m)
 		
 		var days = Math.floor(ttnextep / 86400);
 		var hours = Math.floor(ttnextep / 3600 - days * 24);
-		var minutes = Math.floor(ttnextep / 3600 - days * 1440 - hours * 60);
+		var minutes = Math.floor(ttnextep / 60 - days * 1440 - hours * 60);
 		var seconds = ttnextep - days * 86400 - hours * 3600 - minutes * 60;
 		var retstr = "";
 		
@@ -291,7 +291,6 @@ var reinbot = jerk(function(j) {
 	encoding: "utf-8",
 	nick:     name,
 	die:      false,
-	channels: ["#ponyarchive", "#YayPonies"],
 	user: {
 		username: name,
 		realname: "Rainbow Dash",
@@ -299,5 +298,7 @@ var reinbot = jerk(function(j) {
 	onConnect: function() {
 		if (config.nspass)
 			reinbot.say("NickServ", "identify " + config.nspass);
+		reinbot.join("#ponyarchive");
+		reinbot.join("#YayPonies");
 	},
 });
