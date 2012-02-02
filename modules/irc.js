@@ -38,6 +38,10 @@ exports.init = function (bot, dispatcher, irc, config) {
 			irc.privMsg(this.from || this.nick, this.nick + ", " + msg);
 	};
 	
+	Source.prototype.message = function(msg) {
+		irc.privMsg(this.nick, msg);
+	};
+	
 	function pong(message)
 	{
 		irc.sendRaw("PONG :" + message, true);
@@ -106,6 +110,8 @@ exports.init = function (bot, dispatcher, irc, config) {
 	});
 	
 	dispatcher.on("connect", function() {
+		if (config.pass)
+			irc.pass(config.pass);
 		if (config.nick instanceof Array)
 			irc.nick(config.nick.shift());
 		else if (config.nick)
@@ -148,6 +154,10 @@ exports.init = function (bot, dispatcher, irc, config) {
 		
 		irc.sendRaw((source ? ":" + source.toString() + " " : "") + command + args +
 			(hasLongArg ? " :" + arguments[arguments.length - 1] : ""));
+	};
+		
+	irc.pass = function(pass, callback) {
+		irc.command(null, "PASS", pass, null);
 	};
 	
 	irc.nick = function(nick, callback) {
