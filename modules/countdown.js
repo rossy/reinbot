@@ -47,6 +47,7 @@ exports.init = function (bot, dispatcher, countdown, config) {
 		}
 		
 		var now = new Date().getTime();
+		var said = false;
 		
 		if (now - lastcheck > 3600000)
 		{
@@ -69,20 +70,30 @@ exports.init = function (bot, dispatcher, countdown, config) {
 					        	}
 					        }
 					
-					if (isNaN(pt))
+					if (isNaN(pt) & !said){
+						said = true;
 						bot.irc.privMsg(channel, source.nick + ", " + cdstring(Math.round(dnow / 1000), ponytime));
-					else
+					}
+					else if(!said)
 					{
+						said = true;
 						lastcheck = dnow;
-						bot.irc.privMsg(channel, source.nick + ", " + cdstring(Math.round(dnow / 1000), Math.round(pt / 1000)));
+						ponytime = Math.round(pt / 1000);
+						bot.irc.privMsg(channel, source.nick + ", " + cdstring(Math.round(dnow / 1000), ponytime));
 					}
 				});
 			}).on("error", function(e) {
-				bot.irc.privMsg(channel, source.nick + ", " + cdstring(Math.round(new Date().getTime() / 1000), ponytime));
+				if(!said){
+					said = true;
+					bot.irc.privMsg(channel, source.nick + ", " + cdstring(Math.round(new Date().getTime() / 1000), ponytime));
+				}
 			});
 		}
-		else
+		else if(!said)
+		{
+			said = true;
 			bot.irc.privMsg(channel, source.nick + ", " + cdstring(Math.round(now / 1000), ponytime));
+		}
 	}
 	
 	dispatcher.emit("addResponses", countdown.responses = [
