@@ -70,6 +70,9 @@ exports.init = function (bot, dispatcher, irc, config) {
 				case "001":
 					dispatcher.emit("irc/registered");
 					break;
+				case "353":
+					dispatcher.emit("irc/names");
+					break;
 				case "432":
 					dispatcher.emit("irc/erroenusNick");
 					break;
@@ -175,6 +178,10 @@ exports.init = function (bot, dispatcher, irc, config) {
 	
 	irc.part = function() {
 		irc.command(null, "PART", Array.prototype.join.call(arguments, ","), null);
+	};
+	
+	irc.names = function() {
+		irc.command(null, "NAMES", Array.prototype.join.call(arguments, ","), null);
 	};
 	
 	var lastPrivMsg = "";
