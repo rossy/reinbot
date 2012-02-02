@@ -1,5 +1,5 @@
 "use strict";
-var https = require("https");
+var http = require("http");
 
 var numbers = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
 function makeNumber(num)
@@ -50,21 +50,28 @@ exports.init = function (bot, dispatcher, countdown, config) {
 		
 		if (now - lastcheck > 3600000)
 		{
-			https.get({
-				host: "raw.github.com",
-				path: "/gist/7c951c79891ae9ecde73",
+			http.get({
+				host: "ponycountdown.com",
+				path: "/api.js",
 			}, function(res) {
 				res.setEncoding("utf8");
 				res.on("data", function(chunk) {
 					var dnow = new Date().getTime();
-					var pt = parseInt(chunk);
+					var ponycountdowndates = chunk.match(new RegExp('([A-Za-z]+)([ \n\r\t]+)([0-9]+)([,]+)([ \n\r\t]+)([0-9]+)([ \n\r\t]+)([0-9]+)([:]+)([0-9]+)([:]+)([0-9]+)', 'g'));
+					        var pt = NaN;
+					        for (var i = 0; i < ponycountdowndates.length; i++) {
+					        	pt = new Date(ponycountdowndates[i]).getTime();
+					        	if (pt > dnow) {
+					        		break;
+					        	}
+					        }
 					
 					if (isNaN(pt))
 						bot.irc.privMsg(channel, source.nick + ", " + cdstring(Math.round(dnow / 1000), ponytime));
 					else
 					{
 						lastcheck = dnow;
-						bot.irc.privMsg(channel, source.nick + ", " + cdstring(Math.round(dnow / 1000), pt));
+						bot.irc.privMsg(channel, source.nick + ", " + cdstring(Math.round(dnow / 1000), Math.round(pt / 1000)));
 					}
 				});
 			}).on("error", function(e) {
