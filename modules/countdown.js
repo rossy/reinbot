@@ -58,6 +58,9 @@ exports.init = function (bot, dispatcher, countdown, config) {
 				res.on("data", function(chunk) {
 					var dnow = new Date().getTime();
 					var ponycountdowndates = chunk.match(new RegExp('([A-Za-z]+)([ \n\r\t]+)([0-9]+)([,]+)([ \n\r\t]+)([0-9]+)([ \n\r\t]+)([0-9]+)([:]+)([0-9]+)([:]+)([0-9]+)', 'g'));
+					        if (ponycountdowndates == null) {
+					        	return;
+					        }
 					        var pt = NaN;
 					        for (var i = 0; i < ponycountdowndates.length; i++) {
 					        	pt = new Date(ponycountdowndates[i]).getTime();
