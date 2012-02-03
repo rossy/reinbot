@@ -100,7 +100,7 @@ exports.init = function(bot, dispatcher, respond, config) {
 			(msg.substr(0, bot.irc.currentNick.length) == bot.irc.currentNick &&
 			msg.substr(bot.irc.currentNick.length, 1).match(/[,;: ]/)))
 		{
-			var message = msg.substr((source.from == source.nick ? 0 : bot.irc.currentNick.length + 1)).replace(/^\s+|\s+$/g, "");
+			var message = msg.substr((source.from == bot.irc.currentNick ? 0 : bot.irc.currentNick.length + 1)).replace(/^\s+|\s+$/g, "");
 			var argv = message.split(" ");
 			var m;
 			
