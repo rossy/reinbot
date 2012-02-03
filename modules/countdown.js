@@ -53,7 +53,7 @@ exports.init = function(bot, dispatcher, countdown, config) {
                     }
                 }).on("end", function() {
                     var dnow = new Date();
-                    var ponycountdowndates = data.match(new RegExp('([A-Za-z]+)([ \n\r\t]+)([0-9]+)([,]+)([ \n\r\t]+)([0-9]+)([ \n\r\t]+)([0-9]+)([:]+)([0-9]+)([:]+)([0-9]+)', 'g'));
+                    var ponycountdowndates = data.match(new RegExp('([A-Za-z]+)([ \n\r\t]+)([0-9]+)([,]+)([ \n\r\t]+)([0-9]+)([ \n\r\t]+)([0-9]+)([:]+)([0-9]+)([:]+)([0-9]+)([ \n\r\t]?)([A-Z0-9+]*)([ \n\r\t]?)([)(A-Z]*)', 'g'));
                     if (ponycountdowndates !== null) {
                         var pt = NaN;
                         for (var i = 0; i < ponycountdowndates.length; i++) {
