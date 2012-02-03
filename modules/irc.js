@@ -74,19 +74,19 @@ exports.init = function (bot, dispatcher, irc, config) {
                     dispatcher.emit("irc/list/begin");
                     break;
                 case "322":
-                    dispatcher.emit("irc/list/body");
+                    dispatcher.emit("irc/list/body", args);
                     break;
                 case "323":
                     dispatcher.emit("irc/list/end");
                     break;
                 case "332":
-                    dispatcher.emit("irc/topic");
+                    dispatcher.emit("irc/topic", args);
                     break;
                 case "333":
-                    dispatcher.emit("irc/topic/author");
+                    dispatcher.emit("irc/topic/author", args);
                     break;
 				case "353":
-					dispatcher.emit("irc/names");
+					dispatcher.emit("irc/names", args);
 					break;
                 case "366":
 					dispatcher.emit("irc/names/end");
@@ -95,7 +95,7 @@ exports.init = function (bot, dispatcher, irc, config) {
                     dispatcher.emit("irc/motd/begin");
                     break;
                 case "372":
-                    dispatcher.emit("irc/motd/body");
+                    dispatcher.emit("irc/motd/body", args);
                     break;
                 case "376":
                     dispatcher.emit("irc/motd/end");
