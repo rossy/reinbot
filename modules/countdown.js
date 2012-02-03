@@ -1,4 +1,5 @@
 "use strict";
+
 var http = require("http");
 
 var numbers = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
@@ -38,7 +39,6 @@ exports.init = function(bot, dispatcher, countdown, config) {
         }
 
         var now = new Date().getTime();
-        var said = false;
 
         if (now - lastcheck > 3600000) {
             http.get({
@@ -52,39 +52,28 @@ exports.init = function(bot, dispatcher, countdown, config) {
                         data += chunk;
                     }
                 }).on("end", function() {
-                    var dnow = new Date().getTime();
+                    var dnow = new Date();
                     var ponycountdowndates = data.match(new RegExp('([A-Za-z]+)([ \n\r\t]+)([0-9]+)([,]+)([ \n\r\t]+)([0-9]+)([ \n\r\t]+)([0-9]+)([:]+)([0-9]+)([:]+)([0-9]+)', 'g'));
-                    if (ponycountdowndates === null) {
-                        return;
-                    }
-                    var pt = NaN;
-                    for (var i = 0; i < ponycountdowndates.length; i++) {
-                        pt = new Date(ponycountdowndates[i]).getTime();
-                        if (pt > dnow) {
-                            break;
+                    if (ponycountdowndates !== null) {
+                        var pt = NaN;
+                        for (var i = 0; i < ponycountdowndates.length; i++) {
+                            pt = new Date(ponycountdowndates[i]).getTime();
+                            if (pt > (dnow.getTime() + (dnow.getTimezoneOffset() * 60000))) {
+                                break;
+                            }
+                        }
+                        if (!isNaN(pt)) {
+                            lastcheck = dnow.getTime();
+                            ponytime = Math.round(pt / 1000);
                         }
                     }
-
-                    if (isNaN(pt) & !said) {
-                        said = true;
-                        bot.irc.privMsg(channel, source.nick + ", " + cdstring(Math.round(dnow / 1000), ponytime));
-                    }
-                    else if (!said) {
-                        said = true;
-                        lastcheck = dnow;
-                        ponytime = Math.round(pt / 1000);
-                        bot.irc.privMsg(channel, source.nick + ", " + cdstring(Math.round(dnow / 1000), ponytime));
-                    }
+                    bot.irc.privMsg(channel, source.nick + ", " + cdstring(Math.round(dnow.getTime() / 1000), ponytime));
                 });
             }).on("error", function(e) {
-                if (!said) {
-                    said = true;
-                    bot.irc.privMsg(channel, source.nick + ", " + cdstring(Math.round(new Date().getTime() / 1000), ponytime));
-                }
+                bot.irc.privMsg(channel, source.nick + ", " + cdstring(Math.round(new Date().getTime() / 1000), ponytime));
             });
         }
-        else if (!said) {
-            said = true;
+        else {
             bot.irc.privMsg(channel, source.nick + ", " + cdstring(Math.round(now / 1000), ponytime));
         }
     }
