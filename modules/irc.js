@@ -82,6 +82,9 @@ exports.init = function (bot, dispatcher, irc, config) {
                 case "332":
                     dispatcher.emit("irc/topic");
                     break;
+                case "333":
+                    dispatcher.emit("irc/topic/author");
+                    break;
 				case "353":
 					dispatcher.emit("irc/names");
 					break;
