@@ -178,7 +178,7 @@ exports.init = function (bot, dispatcher, irc, config) {
 	
 	irc.part = function() {
 		irc.command(null, "PART", Array.prototype.join.call(arguments, ","), null);
-	};	
+	};
 	
 	irc.names = function() {
 		irc.command(null, "NAMES", Array.prototype.join.call(arguments, ","), null);
