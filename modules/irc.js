@@ -183,6 +183,12 @@ exports.init = function (bot, dispatcher, irc, config) {
 	irc.names = function() {
 		irc.command(null, "NAMES", Array.prototype.join.call(arguments, ","), null);
 	};
+
+	irc.quit = function() {
+		var msg = Array.prototype.join.call(arguments, " ") || "ponies!";
+		irc.command(null, "QUIT", msg, null);
+		dispatcher.emit("irc/quit");
+	};
 	
 	var lastPrivMsg = "";
 	irc.privMsg = function(nick, message) {
