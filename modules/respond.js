@@ -7,7 +7,7 @@ exports.init = function(bot, dispatcher, respond, config) {
 	var commands = [];
 	
 	actions.lsmod = { action: "lsmod", group: ["owner", "authed"], func: function(source, argv) {
-		source.mention(bot.modules.map(function(module) { return module.name; }).join(", "));
+		source.mention("i have loaded modules: " + bot.modules.map(function(module) { return module.name; }).join(", "));
 	} };
 	
 	actions.load = { action: "load", group: ["owner", "authed"], func: function(source, argv) {
