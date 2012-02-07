@@ -23,30 +23,30 @@ exports.init = function (bot, dispatcher, irc, config) {
 		irc.recvBuffer = "";
 	if (!irc.sendBuffer)
 		irc.sendBuffer = [];
-	
+
 	Source.prototype.respond = function(msg) {
 		if (this.from == bot.irc.currentNick)
 			irc.privMsg(this.nick, msg);
 		else
 			irc.privMsg(this.from || this.nick, msg);
 	};
-	
+
 	Source.prototype.mention = function(msg) {
 		if (this.from == bot.irc.currentNick)
 			irc.privMsg(this.nick, msg);
 		else
 			irc.privMsg(this.from || this.nick, this.nick + ", " + msg);
 	};
-	
+
 	Source.prototype.message = function(msg) {
 		irc.privMsg(this.nick, msg);
 	};
-	
+
 	function pong(message)
 	{
 		irc.sendRaw("PONG :" + message, true);
 	}
-	
+
 	function parseRaw(line)
 	{
 		var m;
@@ -64,15 +64,42 @@ exports.init = function (bot, dispatcher, irc, config) {
 				args.push(m[1] || m[2]);
 				str = m[3];
 			}
-			
+
 			switch (command)
 			{
 				case "001":
 					dispatcher.emit("irc/registered");
 					break;
+                case "321":
+                    dispatcher.emit("irc/list/begin");
+                    break;
+                case "322":
+                    dispatcher.emit("irc/list/body", args);
+                    break;
+                case "323":
+                    dispatcher.emit("irc/list/end");
+                    break;
+                case "332":
+                    dispatcher.emit("irc/topic", args);
+                    break;
+                case "333":
+                    dispatcher.emit("irc/topic/author", args);
+                    break;
 				case "353":
-					dispatcher.emit("irc/names");
+					dispatcher.emit("irc/names", args);
 					break;
+                case "366":
+					dispatcher.emit("irc/names/end");
+					break;
+                case "375":
+                    dispatcher.emit("irc/motd/begin");
+                    break;
+                case "372":
+                    dispatcher.emit("irc/motd/body", args);
+                    break;
+                case "376":
+                    dispatcher.emit("irc/motd/end");
+                    break;
 				case "432":
 					dispatcher.emit("irc/erroenusNick");
 					break;
@@ -85,6 +112,15 @@ exports.init = function (bot, dispatcher, irc, config) {
 					else
 						dispatcher.emit("irc/nickInUse");
 					break;
+                case "451":
+                    dispatcher.emit("irc/notRegistered");
+                    break;
+                case "461":
+                    dispatcher.emit("irc/notEnoughParameters");
+                    break;
+                case "482":
+                    dispatcher.emit("irc/topic/notOperator");
+                    break;
 				case "NOTICE":
 					source.from = args[0];
 					dispatcher.emit("irc/notice", source, args[1]);
@@ -100,7 +136,7 @@ exports.init = function (bot, dispatcher, irc, config) {
 		}
 		return true;
 	}
-	
+
 	dispatcher.on("data", function(data) {
 		var lines = (irc.recvBuffer + data).split("\r\n");
 		for (var i = 0; i < lines.length - 1; i ++)
@@ -111,7 +147,7 @@ exports.init = function (bot, dispatcher, irc, config) {
 		}
 		irc.recvBuffer = lines[lines.length - 1];
 	});
-	
+
 	dispatcher.on("connect", function() {
 		if (config.pass)
 			irc.pass(config.pass);
@@ -124,83 +160,96 @@ exports.init = function (bot, dispatcher, irc, config) {
 			irc.user(config.username, config.realname ? config.realname : config.username, mode);
 		}
 	});
-	
+
 	dispatcher.on("close", function(error) {
 		if (config.log)
 			console.log(Date.now() + " CLOSED" + (error ? " WITH ERROR" : ""));
 	});
-	
+
 	dispatcher.on("dispatchError", function(event, error) {
 		console.log("ERROR dispatching " + event + "\n" + error.stack);
 		if (irc.lastChannel)
 			irc.privMsg(irc.lastChannel, "ERROR dispatching " + event + ", " + error.stack.split("\n")[0]);
 	});
-	
+
 	dispatcher.on("respondError", function(event, error) {
 		console.log("ERROR responding to " + event + "\n" + error.stack);
 		if (irc.lastChannel)
 			irc.privMsg(irc.lastChannel, "ERROR responding to " + event + ", " + error.stack.split("\n")[0]);
 	});
-	
+
 	irc.sendRaw = function(msg, nolog) {
 		if (!nolog && config.log)
 			console.log(Date.now() + " SEND " + msg);
-		
+
 		dispatcher.emit("irc/send", msg);
 		bot.write(msg + "\r\n");
 	};
-	
+
 	irc.command = function(source, command) {
 		var args = "";
 		for (var i = 2; i < arguments.length - 1; i ++)
 			args += " " + arguments[i];
-		
-		var hasLongArg = arguments.length > 2 && arguments[arguments.length - 1] != null;
-		
+
+		var hasLongArg = arguments.length > 2 && arguments[arguments.length - 1] !== null;
+
 		irc.sendRaw((source ? ":" + source.toString() + " " : "") + command + args +
 			(hasLongArg ? " :" + arguments[arguments.length - 1] : ""));
 	};
-		
+
 	irc.pass = function(pass, callback) {
 		irc.command(null, "PASS", pass, null);
 	};
-	
+
 	irc.nick = function(nick, callback) {
 		irc.currentNick = nick;
 		irc.command(null, "NICK", nick, null);
 	};
-	
+
 	irc.user = function(username, realname, mode, callback) {
 		irc.command(null, "USER", username, mode, "*", realname);
 	};
-	
+
 	irc.join = function() {
 		irc.command(null, "JOIN", Array.prototype.join.call(arguments, ","), null);
 	};
-	
+
 	irc.part = function() {
 		irc.command(null, "PART", Array.prototype.join.call(arguments, ","), null);
 	};
-	
-	irc.names = function() {
-		irc.command(null, "NAMES", Array.prototype.join.call(arguments, ","), null);
+
+	irc.names = function(channel) {
+		irc.command(null, "NAMES", channel, null);
 	};
-	
+
+    irc.list = function() {
+		irc.command(null, "LIST");
+	};
+
+    irc.motd = function() {
+        irc.command(null, "MOTD");
+	};
+
+    irc.topic = function(channel, topic) {
+        topic = topic || null;
+		irc.command(null, "TOPIC", channel, topic);
+	};
+
 	var lastPrivMsg = "";
 	irc.privMsg = function(nick, message) {
 		irc.lastChannel = nick;
-		
+
 		if (message != lastPrivMsg)
 			irc.command(null, "PRIVMSG", nick, message);
-		
+
 		lastPrivMsg = message;
 	};
-	
+
 	irc.notice = function(nick, message) {
 		irc.lastChannel = nick;
 		irc.command(null, "NOTICE", nick, message);
 	};
-	
+
 	dispatcher.emit("addResponses", irc.responses = [
 		{ action: "join", group: ["owner", "authed"], func: function(source, argv) {
 			if (argv[1])
