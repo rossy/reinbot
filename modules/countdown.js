@@ -35,7 +35,7 @@ exports.init = function(bot, dispatcher, countdown, config) {
             else if (seconds) retstr = "only " + makeNumber(seconds) + " second" + (seconds == 1 ? "" : "s");
             else retstr = "less than a second";
 
-            return retstr + " until the next episode!";
+            return retstr + " until the next episode of MLP:FiM !";
         }
 
         var now = new Date().getTime();
@@ -53,18 +53,19 @@ exports.init = function(bot, dispatcher, countdown, config) {
                     }
                 }).on("end", function() {
                     var dnow = new Date();
+                    var offset = (dnow.getTimezoneOffset() * 60000);
                     var ponycountdowndates = data.match(new RegExp('([A-Za-z]+)([ \n\r\t]+)([0-9]+)([,]+)([ \n\r\t]+)([0-9]+)([ \n\r\t]+)([0-9]+)([:]+)([0-9]+)([:]+)([0-9]+)([ \n\r\t]?)([A-Z0-9+]*)([ \n\r\t]?)([)(A-Z]*)', 'g'));
                     if (ponycountdowndates !== null) {
                         var pt = NaN;
                         for (var i = 0; i < ponycountdowndates.length; i++) {
                             pt = new Date(ponycountdowndates[i]).getTime();
-                            if (pt > (dnow.getTime() + (dnow.getTimezoneOffset() * 60000))) {
+                            if (pt > (dnow.getTime() + offset)) {
                                 break;
                             }
                         }
                         if (!isNaN(pt)) {
                             lastcheck = dnow.getTime();
-                            ponytime = Math.round(pt / 1000);
+                            ponytime = Math.round((pt - offset) / 1000);
                         }
                     }
                     bot.irc.privMsg(channel, source.nick + ", " + cdstring(Math.round(dnow.getTime() / 1000), ponytime));
