@@ -179,6 +179,12 @@ exports.init = function (bot, dispatcher, irc, config) {
 	irc.part = function() {
 		irc.command(null, "PART", Array.prototype.join.call(arguments, ","), null);
 	};
+
+	irc.quit = function() {
+		var msg = Array.prototype.join.call(arguments, " ") || "ponies!";
+		irc.command(null, "QUIT", msg, null);
+		dispatcher.emit("irc/quit");
+	};	
 	
 	irc.names = function() {
 		irc.command(null, "NAMES", Array.prototype.join.call(arguments, ","), null);
@@ -200,6 +206,15 @@ exports.init = function (bot, dispatcher, irc, config) {
 	};
 	
 	dispatcher.emit("addResponses", irc.responses = [
+		{ action: "quit", group: ["owner"], func: function(source, argv) {
+			source.respond("ok, " + source.nick + "! goodbye everypony!");
+			if (argv[1]){
+				argv.shift();
+				irc.quit.apply(irc, argv);
+			}
+			else
+				irc.quit();
+		} },	
 		{ action: "join", group: ["owner", "authed"], func: function(source, argv) {
 			if (argv[1])
 			{
