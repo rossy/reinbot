@@ -120,7 +120,7 @@ exports.init = function (bot, dispatcher, irc, config) {
 		else if (config.nick)
 			irc.nick(config.nick);
 		if (config.username)
-			irc.user(config.username, config.realname ? config.realname : "", 0);
+			irc.user(config.username, config.realname ? config.realname : config.username, 0);
 	});
 	
 	dispatcher.on("close", function(error) {
