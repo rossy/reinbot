@@ -1,7 +1,7 @@
 var wolframalpha = require("wolframalpha")
 
 exports.init = function(bot, dispatcher, loadavg) {
-	dispatcher.emit("addResponses", loadavg.responses = [
+	dispatcher.emit("addResponses", calc.responses = [
 		{ command: "calc", func: function(source, argv) {
 			if (!argv[1])
 			{
