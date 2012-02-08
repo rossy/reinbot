@@ -119,10 +119,10 @@ exports.init = function (bot, dispatcher, irc, config) {
 			irc.nick(config.nick.shift());
 		else if (config.nick)
 			irc.nick(config.nick);
-		if (config.username) {
-			var mode = ( config.wallops ? 4 : 0 ) + ( config.invisible ? 8 : 0 )
-			irc.user(config.username, config.realname ? config.realname : config.username, mode);
-		}
+		if (!config.username)
+			config.username = irc.currentNick
+		var mode = ( config.wallops ? 4 : 0 ) + ( config.invisible ? 8 : 0 )
+		irc.user(config.username, config.realname ? config.realname : config.username, mode);
 	});
 	
 	dispatcher.on("close", function(error) {
