@@ -2,8 +2,8 @@
 var fs = require("fs");
 
 exports.init = function(bot, dispatcher, loadavg) {
-	dispatcher.emit("addResponses",group: ["owner"], loadavg.responses = [
-		{ action: "loadavg", func: function(source) {
+	dispatcher.emit("addResponses", loadavg.responses = [
+		{ action: "loadavg", group: ["owner"], func: function(source) {
 			fs.readFile("/proc/loadavg", function(err, data) {
 				if (err)
 					source.mention("i don't know :(");
