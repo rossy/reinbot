@@ -119,6 +119,10 @@ exports.init = function (bot, dispatcher, irc, config) {
 			irc.nick(config.nick.shift());
 		else if (config.nick)
 			irc.nick(config.nick);
+		else {
+			config.nick = ["reinbot", "reinbot2", "reinbotter", "ponybot"];
+			irc.nick(config.nick.shift());
+		}
 		if (!config.username)
 			config.username = irc.currentNick
 		var mode = ( config.wallops ? 4 : 0 ) + ( config.invisible ? 8 : 0 )
