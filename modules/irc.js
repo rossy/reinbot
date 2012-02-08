@@ -185,9 +185,9 @@ exports.init = function (bot, dispatcher, irc, config) {
 	};
 
 	irc.quit = function() {
-		var msg = Array.prototype.join.call(arguments, " ") || "ponies!";
-		irc.command(null, "QUIT", msg, null);
 		dispatcher.emit("irc/quit");
+		var msg = Array.prototype.join.call(arguments, " ") || config.quitMessage || "ponies!";
+		irc.command(null, "QUIT", msg, null);
 	};
 	
 	var lastPrivMsg = "";
