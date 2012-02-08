@@ -11,7 +11,7 @@ exports.init = function(bot, dispatcher, loadavg) {
 			
 			argv.shift();
 			(new wolframalpha()).search(argv.join(" "), function(result) {
-				source.mention(result.data ? result.data.replace(/\\'/g, "'") : "i don't know the answer :(");
+				source.mention(result.data ? "the answer is: " + result.data.replace(/\\'/g, "'") : "i don't know the answer :(");
 			});
 		} },
 	]);
