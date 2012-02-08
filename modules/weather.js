@@ -6,8 +6,10 @@ exports.init = function(bot, dispatcher, weather, config) {
 	dispatcher.emit("addResponses", weather.responses = [
 		{ command: "we", func: function(source, argv) {
 			var data = "";
-			if (!argv[1])
+			if (!argv[1]){
 				source.mention("please give a location.");
+				return;
+			}
 			
 			if (argv[1].toLowerCase() == "equestria")
 			{
