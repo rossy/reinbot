@@ -1,5 +1,7 @@
 "use strict";
 
+global.reinbot_path = __dirname;
+
 function Module(name, bot, dispatchBase)
 {
 	var events = [];
@@ -38,7 +40,7 @@ function Module(name, bot, dispatchBase)
 	};
 	
 	this.name = name;
-	this.fileName = "./modules/" + name + ".js";
+	this.fileName = reinbot_path + "/modules/" + name + ".js";
 	this.fullPath = require.resolve(this.fileName);
 	
 	if (!bot[name])

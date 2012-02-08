@@ -19,7 +19,7 @@ exports.init = function(bot, dispatcher, respond, config) {
 		argv.shift();
 		
 		argv.forEach(function(arg) {
-			if (!path.existsSync("./modules/" + arg + ".js"))
+			if (!path.existsSync(reinbot_path + "/modules/" + arg + ".js"))
 			{
 				source.mention(arg + " doesn't exist");
 				return;
@@ -39,7 +39,7 @@ exports.init = function(bot, dispatcher, respond, config) {
 		argv.shift();
 		
 		argv.forEach(function(arg) {
-			if (!path.existsSync("./modules/" + arg + ".js"))
+			if (!path.existsSync(reinbot_path + "/modules/" + arg + ".js"))
 			{
 				source.mention(arg + " doesn't exist");
 				return;
