@@ -198,8 +198,6 @@ exports.init = function (bot, dispatcher, irc, config) {
 	var lastPrivMsg = "";
 	var lastPrivMsgTime = 0;
 	irc.privMsg = function(nick, message) {
-		irc.lastChannel = nick;
-
 		var now = new Date().getTime();
 
 		if (message == lastPrivMsg) {
@@ -207,7 +205,8 @@ exports.init = function (bot, dispatcher, irc, config) {
 				return;
 			}
 		}
-	
+
+		irc.lastChannel = nick;	
 		irc.command(null, "PRIVMSG", nick, message);
 		lastPrivMsg = message;
 		lastPrivMsgTime = now;
