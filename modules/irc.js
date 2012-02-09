@@ -87,11 +87,25 @@ exports.init = function (bot, dispatcher, irc, config) {
 					break;
 				case "NOTICE":
 					source.from = args[0];
-					dispatcher.emit("irc/notice", source, args[1]);
+					var text = args[1];
+					if (text.charCodeAt(0) === 1 && text.charCodeAt((text.length - 1)) === 1) {
+						text = text.slice(1)
+						text = text.slice(0, (text.length - 1))
+						dispatcher.emit("irc/ctcp", source, text, 'notice');
+					} else {
+						dispatcher.emit("irc/notice", source, text);
+					}
 					break;
 				case "PRIVMSG":
 					source.from = args[0];
-					dispatcher.emit("irc/privMsg", source, args[1]);
+					var text = args[1];
+					if (text.charCodeAt(0) === 1 && text.charCodeAt((text.length - 1)) === 1) {
+						text = text.slice(1)
+						text = text.slice(0, (text.length - 1))
+						dispatcher.emit("irc/ctcp", source, text, 'privmsg');
+					} else {
+						dispatcher.emit("irc/privMsg", source, text);
+					}					
 					break;
 				case "PING":
 					pong(args[0]);
@@ -209,6 +223,14 @@ exports.init = function (bot, dispatcher, irc, config) {
 		irc.lastChannel = nick;
 		irc.command(null, "NOTICE", nick, message);
 	};
+
+	irc.ctcp = function(nick, message, type) {
+		if(type == 'privmsg') {
+			irc.privMsg(nick, String.fromCharCode(0x01) + message + String.fromCharCode(0x01));
+		} else {
+			irc.notice(nick, String.fromCharCode(0x01) + message + String.fromCharCode(0x01));
+		}
+	}
 	
 	dispatcher.emit("addResponses", irc.responses = [
 		{ action: "quit", group: ["owner"], func: function(source, argv) {
