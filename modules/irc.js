@@ -145,9 +145,13 @@ exports.init = function (bot, dispatcher, irc, config) {
 	irc.sendRaw = function(msg, nolog) {
 		if (!nolog && config.log)
 			console.log(Date.now() + " SEND " + msg);
-		
-		dispatcher.emit("irc/send", msg);
-		bot.write(msg + "\r\n");
+		if(msg.search(/^QUIT/) != -1) {
+			dispatcher.emit("irc/quit");
+			bot.end(msg + "\r\n");
+		} else {
+			dispatcher.emit("irc/send", msg);
+			bot.write(msg + "\r\n");
+		}
 	};
 	
 	irc.command = function(source, command) {
@@ -185,6 +189,11 @@ exports.init = function (bot, dispatcher, irc, config) {
 	irc.names = function() {
 		irc.command(null, "NAMES", Array.prototype.join.call(arguments, ","), null);
 	};
+
+	irc.quit = function() {
+		var msg = Array.prototype.join.call(arguments, " ") || config.quitMessage || "ponies!";
+		irc.command(null, "QUIT", msg, null);
+	};
 	
 	var lastPrivMsg = "";
 	irc.privMsg = function(nick, message) {
@@ -202,6 +211,15 @@ exports.init = function (bot, dispatcher, irc, config) {
 	};
 	
 	dispatcher.emit("addResponses", irc.responses = [
+		{ action: "quit", group: ["owner"], func: function(source, argv) {
+			source.respond("ok, " + source.nick + "! goodbye everypony!");
+			if (argv[1]){
+				argv.shift();
+				irc.quit.apply(irc, argv);
+			}
+			else
+				irc.quit();
+		} },	
 		{ action: "join", group: ["owner", "authed"], func: function(source, argv) {
 			if (argv[1])
 			{
