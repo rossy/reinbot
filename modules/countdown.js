@@ -62,7 +62,8 @@ exports.init = function(bot, dispatcher, countdown, config) {
                         for (var i = 0; i < ponycountdowndates.length; i++) {
                             pt = new Date(ponycountdowndates[i]).getTime();
                             if (pt > (dnow.getTime() + offset)) {
-                                episode = episodesnames[i].split(",")[3];
+                            	var tep = episodesnames[i].split(",");
+                                episode = "Season " + tep[1] + " Episode " + tep[2] + " (" + tep[3].replace(/\"/g,'') + ")";
                                 ponytime = Math.round((pt - offset) / 1000);
                                 lastcheck = dnow.getTime();
                                 break;
