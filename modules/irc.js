@@ -1,7 +1,8 @@
 "use strict";
 
-function Source(nick, user, host)
+function Source(irc, nick, user, host)
 {
+	this.irc = irc;
 	this.nick = nick;
 	this.user = user;
 	this.host = host;
@@ -9,12 +10,29 @@ function Source(nick, user, host)
 Source.prototype.valueOf = Source.prototype.toString = function() {
 	return this.nick + (this.host ? (this.user ? "!" + this.user : "") + "@" + this.host : "");
 };
-Source.fromString = function(string) {
+Source.fromString = function(irc, string) {
 	var m = string.match(/^([^ !@]+)(?:(?:!([^ @]+))?@([^ ]+))?$/);
 	if (m)
-		return new Source(m[1], m[2], m[3]);
+		return new Source(irc, m[1], m[2], m[3]);
 	else
 		return null;
+};
+Source.prototype.respond = function(msg) {
+	if (this.from == this.irc.currentNick)
+		this.irc.privMsg(this.nick, msg);
+	else
+		this.irc.privMsg(this.from || this.nick, msg);
+};
+
+Source.prototype.mention = function(msg) {
+	if (this.from == this.irc.currentNick)
+		this.irc.privMsg(this.nick, msg);
+	else
+		this.irc.privMsg(this.from || this.nick, this.nick + ", " + msg);
+};
+
+Source.prototype.message = function(msg) {
+	this.irc.privMsg(this.nick, msg);
 };
 exports.Source = Source;
 
@@ -23,24 +41,6 @@ exports.init = function (bot, dispatcher, irc, config) {
 		irc.recvBuffer = "";
 	if (!irc.sendBuffer)
 		irc.sendBuffer = [];
-	
-	Source.prototype.respond = function(msg) {
-		if (this.from == bot.irc.currentNick)
-			irc.privMsg(this.nick, msg);
-		else
-			irc.privMsg(this.from || this.nick, msg);
-	};
-	
-	Source.prototype.mention = function(msg) {
-		if (this.from == bot.irc.currentNick)
-			irc.privMsg(this.nick, msg);
-		else
-			irc.privMsg(this.from || this.nick, this.nick + ", " + msg);
-	};
-	
-	Source.prototype.message = function(msg) {
-		irc.privMsg(this.nick, msg);
-	};
 	
 	function pong(message)
 	{
@@ -57,7 +57,7 @@ exports.init = function (bot, dispatcher, irc, config) {
 			var args = [];
 			var str = m[3];
 			if (m[1])
-				source = Source.fromString(m[1]);
+				source = Source.fromString(irc, m[1]);
 			while (str.length)
 			{
 				m = str.match(/ (?::(.*)|([^ ]+))(.*)$/);
