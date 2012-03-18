@@ -7,7 +7,7 @@ exports.init = function(bot, dispatcher, loadavg) {
 			fs.readFile("/proc/loadavg", function(err, data) {
 				if (err)
 					source.mention("i don't know :(");
-				else source.mention(data.replace(/\n/g, ""));
+				else source.mention(data.toString().replace(/\n/g, ""));
 			});
 		} },
 	]);
