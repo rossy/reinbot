@@ -70,12 +70,8 @@ exports.connect = function(port, host, ssl, connectListener) {
 			dispatcher.emit("connect");
 			
 			socket.setEncoding('utf8');
-			socket.on("data", function(data) {
-				dispatcher.emit("data", data);
-			});
-			socket.on("close", function(error) {
-				dispatcher.emit("close", error);
-			});
+			socket.on("data", dispatcher.emit.bind(dispatcher, "data"));
+			socket.on("data", dispatcher.emit.bind(dispatcher, "close"));
 		});
 		
 		dispatcher.setMaxListeners(0);
@@ -110,30 +106,11 @@ exports.connect = function(port, host, ssl, connectListener) {
 			modules.push(new Module(name, this, dispatcher));
 		};
 		
-		this.on = function(event, listener) {
-			dispatcher.on(event, listener);
-		};
-		
-		this.once = function(event, listener) {
-			dispatcher.once(event, listener);
-		};
-		
-		this.addListener = this.on;
-		
-		this.removeListener = function(event, listener) {
-			dispatcher.removeListener(event, listener);
-		};
-		
-		this.emit = function() {
-			dispatcher.emit.apply(dispatcher, arguments);
-		}
-		
-		this.write = function(data) {
-			socket.write(data);
-		};
-		
-		this.end = function(data){
-			socket.end(data);
-		}
+		this.on = this.addListener = dispatcher.on.bind(dispatcher);
+		this.off = this.removeListener = dispatcher.removeListener.bind(dispatcher);
+		this.once = dispatcher.once.bind(dispatcher);
+		this.emit = dispatcher.emit.bind(dispatcher);
+		this.write = socket.write.bind(socket);
+		this.end = socket.end.bind(socket);
 	})();
 };
