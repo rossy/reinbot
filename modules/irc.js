@@ -186,9 +186,8 @@ exports.init = function (bot, dispatcher, irc, config) {
 		irc.command(null, "NAMES", Array.prototype.join.call(arguments, ","), null);
 	};
 
-	irc.quit = function() {
-		var msg = Array.prototype.join.call(arguments, " ") || config.quitMessage || "ponies!";
-		irc.command(null, "QUIT", msg, null);
+	irc.quit = function(message) {
+		irc.command(null, "QUIT", message || config.quitMessage || "Leaving");
 		bot.end();
 	};
 	
