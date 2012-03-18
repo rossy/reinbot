@@ -145,13 +145,9 @@ exports.init = function (bot, dispatcher, irc, config) {
 	irc.sendRaw = function(msg, nolog) {
 		if (!nolog && config.log)
 			console.log(Date.now() + " SEND " + msg);
-		if(msg.search(/^QUIT/) != -1) {
-			dispatcher.emit("irc/quit");
-			bot.end(msg + "\r\n");
-		} else {
-			dispatcher.emit("irc/send", msg);
-			bot.write(msg + "\r\n");
-		}
+		
+		dispatcher.emit("irc/send", msg);
+		bot.write(msg + "\r\n");
 	};
 	
 	irc.command = function(source, command) {
@@ -193,6 +189,7 @@ exports.init = function (bot, dispatcher, irc, config) {
 	irc.quit = function() {
 		var msg = Array.prototype.join.call(arguments, " ") || config.quitMessage || "ponies!";
 		irc.command(null, "QUIT", msg, null);
+		bot.end();
 	};
 	
 	var lastPrivMsg = "";
