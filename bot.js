@@ -134,6 +134,7 @@ exports.connect = function(port, host, ssl, connectListener) {
 		
 		this.end = function(data){
 			socket.end(data);
+			process.exit();			
 		}
 	})();
 };
