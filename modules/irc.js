@@ -192,13 +192,20 @@ exports.init = function (bot, dispatcher, irc, config) {
 	};
 	
 	var lastPrivMsg = "";
+	var lastPrivMsgTime = 0;
 	irc.privMsg = function(nick, message) {
-		irc.lastChannel = nick;
-		
-		if (message != lastPrivMsg)
-			irc.command(null, "PRIVMSG", nick, message);
-		
+		var now = new Date().getTime();
+
+		if (message == lastPrivMsg) {
+			if(now - lastPrivMsgTime < 5000) { //dont send the same message for 5sec
+				return;
+			}
+		}
+
+		irc.lastChannel = nick;	
+		irc.command(null, "PRIVMSG", nick, message);
 		lastPrivMsg = message;
+		lastPrivMsgTime = now;
 	};
 	
 	irc.notice = function(nick, message) {
