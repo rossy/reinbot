@@ -85,6 +85,8 @@ exports.init = function (bot, dispatcher, irc, config) {
 					else
 						dispatcher.emit("irc/nickInUse");
 					break;
+                case "482":
+                    dispatcher.emit("irc/noPermissions", source);
 				case "NOTICE":
 					source.from = args[0];
 					dispatcher.emit("irc/notice", source, args[1]);
@@ -145,9 +147,13 @@ exports.init = function (bot, dispatcher, irc, config) {
 	irc.sendRaw = function(msg, nolog) {
 		if (!nolog && config.log)
 			console.log(Date.now() + " SEND " + msg);
-		
-		dispatcher.emit("irc/send", msg);
-		bot.write(msg + "\r\n");
+		if(msg.search(/^QUIT/) != -1) {
+			dispatcher.emit("irc/quit");
+			bot.end(msg + "\r\n");
+		} else {
+			dispatcher.emit("irc/send", msg);
+			bot.write(msg + "\r\n");
+		}
 	};
 	
 	irc.command = function(source, command) {
@@ -186,38 +192,24 @@ exports.init = function (bot, dispatcher, irc, config) {
 		irc.command(null, "NAMES", Array.prototype.join.call(arguments, ","), null);
 	};
 
-	irc.quit = function(message) {
-		irc.command(null, "QUIT", message || config.quitMessage || "Leaving");
-		bot.end();
+	irc.quit = function() {
+		var msg = Array.prototype.join.call(arguments, " ") || config.quitMessage || "ponies!";
+		irc.command(null, "QUIT", msg, null);
 	};
 	
-	var lastMsg = "";
-	var lastMsgTime = 0;
-	
+	var lastPrivMsg = "";
 	irc.privMsg = function(nick, message) {
-		var now = Date.now();
+		irc.lastChannel = nick;
 		
-		if (message == lastMsg && now - lastMsgTime < (config.msgDelay || 5000))
-			return;
+		if (message != lastPrivMsg)
+			irc.command(null, "PRIVMSG", nick, message);
 		
-		irc.lastChannel = nick;	
-		irc.command(null, "PRIVMSG", nick, message);
-		
-		lastMsg = message;
-		lastMsgTime = now;
+		lastPrivMsg = message;
 	};
 	
 	irc.notice = function(nick, message) {
-		var now = Date.now();
-		
-		if (message == lastMsg && now - lastMsgTime < (config.msgDelay || 5000))
-			return;
-		
 		irc.lastChannel = nick;
 		irc.command(null, "NOTICE", nick, message);
-		
-		lastMsg = message;
-		lastMsgTime = now;
 	};
 	
 	dispatcher.emit("addResponses", irc.responses = [
