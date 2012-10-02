@@ -6,6 +6,17 @@ exports.init = function(bot, dispatcher, respond, config) {
 	var actions = [];
 	var commands = [];
 	
+	actions.help = { action: "help", func: function(source, argv) {
+		if(bot.responses && bot.responses.prefix && bot.responses.prefix.length > 0){
+			var comm = [];
+			for(var x in commands)
+				comm.push(bot.responses.prefix + commands[x].command)
+			source.mention("available commands are: " + comm.join(", "));
+		}else{
+			source.mention("i know no commands that you can use");
+		}
+	} };
+	
 	actions.lsmod = { action: "lsmod", group: ["owner", "authed"], func: function(source, argv) {
 		source.mention("i have loaded modules: " + bot.modules.map(function(module) { return module.name; }).join(", "));
 	} };
